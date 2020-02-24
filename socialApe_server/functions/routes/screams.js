@@ -115,7 +115,7 @@ exports.commentOnScream = (req, res) => {
 };
 
 // Like a scream
-exports.likeStream = (req, res) => {
+exports.likeScream = (req, res) => {
   const likeDocument = db
     .collection("likes")
     .where("userHandle", "==", req.user.handle)
