@@ -1,4 +1,4 @@
-const db = require("../util/admin");
+const { db } = require("../util/admin");
 const functions = require("firebase-functions");
 
 exports.getAllScreams = (req, res) => {

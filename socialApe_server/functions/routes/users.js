@@ -1,8 +1,7 @@
-const { db } = require("../util/admin");
+const { admin, db } = require("../util/admin");
 const config = require("../util/config");
 const firebase = require("firebase/app");
 require("firebase/auth");
-const { admin } = require("../util/admin");
 
 firebase.initializeApp(config);
 
@@ -22,13 +21,12 @@ exports.signup = (req, res) => {
 
   const { valid, errors } = validateSignupData(newUser);
   if (!valid) return res.status(400).json(errors);
-
+  const noImg = "no-img.png";
   let token, userId;
   return db
     .doc(`/users/${newUser.handle}`)
     .get()
     .then(doc => {
-      console.log("doc:", doc.exists);
       if (doc.exists) {
         return res.status(400).json({ handle: "this handle is already taken" });
       } else {
@@ -38,7 +36,6 @@ exports.signup = (req, res) => {
       }
     })
     .then(data => {
-      console.log("data:", data).user;
       userId = data.user.uid;
       return data.user.getIdToken();
     })
@@ -49,7 +46,7 @@ exports.signup = (req, res) => {
         email: newUser.email,
         createdAt: new Date().toISOString(),
         userId,
-        imageUrl: `firebase.storage.googleapis.com/v0/b/${config.storageBucket}/0/no-img.png?alt=media`
+        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
       };
       return db.doc(`/users/${newUser.handle}`).set(userCredentials);
     })
@@ -104,7 +101,7 @@ exports.addUserDetails = (req, res) => {
   db.doc(`/users/${req.user.handle}`)
     .update(userDetails)
     .then(() => {
-      return res.json({ mesage: "Details added successfully" });
+      return res.json({ message: "Details added successfully" });
     })
     .catch(err => {
       console.error(err);
@@ -114,17 +111,19 @@ exports.addUserDetails = (req, res) => {
 
 // get own user details
 exports.getAuthenticatedUser = (req, res) => {
+  console.log("getAuthenticatedUser");
   let userData = {};
-  db.doc(`/users/${req.user.handle}`).get();
-  then(doc => {
-    if (doc.exists) {
-      userData.credentials = doc.data();
-      return db
-        .collection("likes")
-        .where("userHandle", "==", req.user.handle)
-        .get();
-    }
-  })
+  db.doc(`/users/${req.user.handle}`)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        userData.credentials = doc.data();
+        return db
+          .collection("likes")
+          .where("userHandle", "==", req.user.handle)
+          .get();
+      }
+    })
     .then(data => {
       data.forEach(doc => {
         userData.likes = [];
@@ -161,8 +160,8 @@ exports.getAuthenticatedUser = (req, res) => {
 //get any user details
 exports.getUserDetails = (req, res) => {
   let userData = {};
-
-  db.doc("/users/${req.params.handle")
+  console.log("getUserDetails");
+  db.doc(`/users/${req.params.handle}`)
     .get()
     .then(doc => {
       if (doc.exists) {
@@ -171,24 +170,31 @@ exports.getUserDetails = (req, res) => {
           .collection("screams")
           .where("userHandle", "==", req.params.handle)
           .orderBy("createdAt", "desc")
-          .get();
+          .get()
+          .catch(err =>
+            res.status(404).json({ error: "User does not have screams" })
+          );
       } else {
         return res.status(404).json({ error: "User not found" });
       }
     })
     .then(data => {
-      userData.screams = [];
-      data.forEach(doc => {
-        userData.screams.push({
-          body: doc.data().body,
-          createdAt: doc.data().createdAt,
-          userHandle: doc.data().userHandle,
-          userImage: doc.data().userImage,
-          likeCount: doc.data().likeCount,
-          commentCount: doc.data().commentCount,
-          screamId: doc.id
+      if (data) {
+        userData.screams = [];
+        data.forEach(doc => {
+          userData.screams.push({
+            body: doc.data().body,
+            createdAt: doc.data().createdAt,
+            userHandle: doc.data().userHandle,
+            userImage: doc.data().userImage,
+            likeCount: doc.data().likeCount,
+            commentCount: doc.data().commentCount,
+            screamId: doc.id
+          });
         });
-      });
+      } else {
+        res.status(404).json({ error: "User does not have screams22" });
+      }
       return res.json(userData);
     })
     .catch(err => {
