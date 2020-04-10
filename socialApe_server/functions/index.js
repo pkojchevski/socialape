@@ -48,10 +48,11 @@ exports.api = functions.region("europe-west1").https.onRequest(app);
 
 exports.createNotificationOnLike = functions
   .region("europe-west1")
-  .firestore.document("/likes/{id}")
+  .firestore.document("likes/{id}")
   .onCreate(snapshot => {
+    console.log("snapshot:", snapshot.id);
     return db
-      .doc(`screams/${snapshot.data().screamId}`)
+      .doc(`/screams/${snapshot.data().screamId}`)
       .get()
       .then(doc => {
         if (
@@ -60,7 +61,7 @@ exports.createNotificationOnLike = functions
         ) {
           return db.doc(`/notifications/${snapshot.id}`).set({
             createdAt: new Date().toISOString(),
-            recipient: doc.data().userHandler(),
+            recipient: doc.data().userHandle,
             sender: snapshot.data().userHandle,
             type: "like",
             read: false,
@@ -97,9 +98,10 @@ exports.createNotificationOnComment = functions
           doc.exists &&
           doc.data().userHandle !== snapshot.data().userHandle
         ) {
+          console.log(snapshot.id);
           return db.doc(`/notifications/${snapshot.id}`).set({
             createdAt: new Date().toISOString(),
-            recipient: doc.data().userHandle,
+            recipient: doc.userHandle,
             sender: snapshot.data().userHandle,
             type: "comment",
             read: false,
@@ -110,4 +112,24 @@ exports.createNotificationOnComment = functions
       .catch(() => {
         console.error(err);
       });
+  });
+
+exports.onImageChange = functions
+  .region("europe-west1")
+  .firestore.document("/users/{userId}")
+  .onUpdate(change => {
+    if (change.before.data().imageUrl !== change.after.data().imageUrl) {
+      const batch = db.batch();
+      return db
+        .collection("screams")
+        .where("userHandle", "==", change.before.data().handle)
+        .get()
+        .then(data => {
+          data.forEach(doc => {
+            const scream = db.doc(`screams/${doc.id}`);
+            batch.update(scream, { userImage: change.after });
+          });
+          return batch.commit();
+        });
+    } else return true;
   });

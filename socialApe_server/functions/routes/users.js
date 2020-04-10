@@ -46,7 +46,7 @@ exports.signup = (req, res) => {
         email: newUser.email,
         createdAt: new Date().toISOString(),
         userId,
-        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`
+        imageUrl: `https://firebasestorage.googleapis.com/v0/b/socialape-4e15e.appspot.com/o/no-img.png?alt=media&token=58a6d334-3eef-427a-a7fe-f1a0742a67de`
       };
       return db.doc(`/users/${newUser.handle}`).set(userCredentials);
     })
@@ -81,7 +81,6 @@ exports.login = (req, res) => {
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then(data => {
-      console.log("data:", data);
       return data.user.getIdToken();
     })
     .then(token => {
@@ -111,7 +110,6 @@ exports.addUserDetails = (req, res) => {
 
 // get own user details
 exports.getAuthenticatedUser = (req, res) => {
-  console.log("getAuthenticatedUser");
   let userData = {};
   db.doc(`/users/${req.user.handle}`)
     .get()
@@ -125,8 +123,8 @@ exports.getAuthenticatedUser = (req, res) => {
       }
     })
     .then(data => {
+      userData.likes = [];
       data.forEach(doc => {
-        userData.likes = [];
         userData.likes.push(doc.data());
       });
       return db
@@ -207,13 +205,14 @@ exports.getUserDetails = (req, res) => {
 
 exports.markNotificationsRead = (req, res) => {
   let batch = db.batch();
+  console.log("req.body:", req.body);
   req.body.forEach(notif => {
-    const notification = db.doc(`/notifications/${notif.notificationId}`);
+    const notification = db.doc(`/notifications/${notif}`);
     batch.update(notification, { read: true });
     batch
       .commit()
       .then(() => {
-        return res.jsn({ message: "Notification market read" });
+        return res.json({ message: "Notification market read" });
       })
       .catch(err => {
         console.error(err);
@@ -228,18 +227,18 @@ exports.uploadImage = (req, res) => {
   const path = require("path");
   const os = require("os");
   const fs = require("fs");
-
+  console.log("req.headers:", req.headers);
   const busboy = new BusBoy({ headers: req.headers });
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
-    if (mimetype !== "image/jpeg" || mimetype !== "image/png") {
+    if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
       return res.status(400).json({ error: "Wrong file type submitted" });
     }
     const imageExtension = filename.split(".")[filename.split(".").length - 1];
     const imageFileName = `${Math.round(
       Math.random() * 1000000000000
-    )}.${imageExtension}`;
+    ).toString()}.${imageExtension}`;
     const filepath = path.join(os.tmpdir(), imageFileName);
-    imageToBuUploaded = { filepath, mimetype };
+    imageToBeUploaded = { filepath, mimetype };
     file.pipe(fs.createWriteStream(filepath));
   });
 
