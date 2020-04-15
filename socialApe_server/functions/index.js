@@ -78,6 +78,7 @@ exports.deleteNotificationOnLike = functions
   .region("europe-west1")
   .firestore.document("likes/{id}")
   .onDelete(snapshot => {
+
     return db
       .doc(`/notifications/${snapshot.id}`)
       .delete()
@@ -90,18 +91,21 @@ exports.createNotificationOnComment = functions
   .region("europe-west1")
   .firestore.document("comments/{id}")
   .onCreate(snapshot => {
+    console.log('snapshot.data:', snapshot.data())
     return db
       .doc(`/screams/${snapshot.data().screamId}`)
       .get()
       .then(doc => {
+        console.log('doc.id:', doc.id)
+        console.log('doc.data():', doc.data())
         if (
           doc.exists &&
           doc.data().userHandle !== snapshot.data().userHandle
         ) {
-          console.log(snapshot.id);
+
           return db.doc(`/notifications/${snapshot.id}`).set({
             createdAt: new Date().toISOString(),
-            recipient: doc.userHandle,
+            recipient: doc.data().userHandle,
             sender: snapshot.data().userHandle,
             type: "comment",
             read: false,
@@ -109,7 +113,7 @@ exports.createNotificationOnComment = functions
           });
         }
       })
-      .catch(() => {
+      .catch((err) => {
         console.error(err);
       });
   });

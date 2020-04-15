@@ -18,53 +18,53 @@ import { useInput } from "../hooks/useInput.hooks";
 
 const styles = {
   form: {
-    textAlign: "center"
+    textAlign: "center",
   },
   image: {
     margin: "20px auto",
     width: "50px",
-    display: "block"
+    display: "block",
   },
   pageTitle: {
-    margin: "10px auto 10px auto"
+    margin: "10px auto 10px auto",
   },
   textField: {
-    margin: "10px auto 10px auto"
+    margin: "10px auto 10px auto",
   },
   button: {
     marginTop: 20,
-    position: "relative"
+    position: "relative",
   },
   customError: {
     color: "red",
     fontSize: "0.8rem",
-    marginTop: 10
+    marginTop: 10,
   },
   progress: {
-    position: "absolute"
-  }
+    position: "absolute",
+  },
 };
 const Signup = ({ classes, history, onSignup, ui: { loading, errors } }) => {
   const { value: email, bind: bindEmail, reset: resetEmail } = useInput("");
   const {
     value: password,
     bind: bindPassword,
-    reset: resetPassword
+    reset: resetPassword,
   } = useInput("");
   const {
     value: confirmPassword,
     bind: bindConfirmPassword,
-    reset: resetConfirmPassword
+    reset: resetConfirmPassword,
   } = useInput("");
   const { value: handle, bind: bindHandle, reset: resetHandle } = useInput("");
 
-  const handleSubmit = event => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     const userData = {
       email,
       password,
       confirmPassword,
-      handle
+      handle,
     };
     onSignup(userData, history);
 
@@ -161,20 +161,22 @@ const Signup = ({ classes, history, onSignup, ui: { loading, errors } }) => {
 };
 
 Login.propTypes = {
-  classes: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired,
-  UI: PropTypes.object.isRequired,
-  logoutUser: PropTypes.func.isRequired
+  classes: PropTypes.object,
+  user: PropTypes.object,
+  history: PropTypes.object,
+  ui: PropTypes.object,
+  onSignup: PropTypes.func,
+  logoutUser: PropTypes.func,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   user: state.user,
-  ui: state.UI
+  ui: state.UI,
 });
 
-const mapActionsToProps = dispatch => ({
+const mapActionsToProps = (dispatch) => ({
   onSignup: (userData, history) =>
-    dispatch(actions.signupUser(userData, history))
+    dispatch(actions.signupUser(userData, history)),
 });
 
 export default connect(

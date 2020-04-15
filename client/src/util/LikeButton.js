@@ -1,8 +1,8 @@
 import React from "react";
 
-import MyButton from "../../util/MyButton.js";
+import MyButton from "./MyButton.js";
 import { Link } from "react-router-dom";
-import * as actions from "../../redux/actions/index";
+import * as actions from "../redux/actions/index";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -45,10 +45,10 @@ const LikeButton = ({
       <FavoriteIcon color="primary" />
     </MyButton>
   ) : (
-    <MyButton tip="like" onClick={likeScream}>
-      <FavoriteBorderIcon color="primary" />
-    </MyButton>
-  );
+        <MyButton tip="like" onClick={likeScream}>
+          <FavoriteBorderIcon color="primary" />
+        </MyButton>
+      );
 };
 
 const mapStateToProps = state => ({

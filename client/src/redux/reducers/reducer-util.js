@@ -5,3 +5,5 @@ export const deleteScreamUtl = (screams, id) => {
   console.log("splice:", screams.splice(index, 1));
   return screams.splice(index, 1);
 };
+
+export const isObjectEmpty = (obj) => Object.keys(obj).length === 0

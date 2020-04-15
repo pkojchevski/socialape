@@ -55,10 +55,11 @@ exports.addOneStream = (req, res) => {
 // fetch scream
 exports.getScream = (req, res) => {
   let screamData = {};
-
+  console.log('req.params.screamId:', req.params.screamId);
   db.doc(`/screams/${req.params.screamId}`)
     .get()
     .then(doc => {
+      console.log('doc.exists:', doc.exists)
       if (!doc.exists) {
         return res.status(404).json({ error: "Scream not found" });
       }
@@ -66,15 +67,16 @@ exports.getScream = (req, res) => {
       screamData.screamId = doc.id;
       return db
         .collection("comments")
-        .orderBy("createdAt", "==", desc)
+        .orderBy("createdAt", 'desc')
         .where("screamId", "==", req.params.screamId)
         .get();
     })
     .then(data => {
       screamData.comments = [];
-      console.log(data);
-      if (data.empty) {
+      console.log('data:', data);
+      if (!data.empty) {
         data.forEach(doc => {
+          console.log('doc:', doc)
           screamData.comments.push(doc.data());
         });
       }
@@ -88,7 +90,10 @@ exports.getScream = (req, res) => {
 
 // comments on scream
 exports.commentOnScream = (req, res) => {
-  if (req.body.body.trim() === "")
+  console.log('req:', req.body)
+  console.log('req.user:', req.user)
+  console.log('req.params:', req.params)
+  if (req.body && req.body.body.trim() === "")
     return res.status(400).json({ error: "Comment must not to be empty" });
 
   const newComment = {
@@ -99,9 +104,10 @@ exports.commentOnScream = (req, res) => {
     userImage: req.user.imageUrl
   };
 
-  db.doc(`/screams/${req.params.screams}`)
+  db.doc(`/screams/${req.params.screamId}`)
     .get()
     .then(doc => {
+      console.log('doc exists:', doc.exists)
       if (!doc.exists) {
         return res.status(404).json({ error: "Scream not found" });
       }
@@ -110,11 +116,12 @@ exports.commentOnScream = (req, res) => {
     .then(() => {
       return db.collection("comments").add(newComment);
     })
-    .then(() => {
-      res.json(newComment);
+    .then((data) => {
+      console.log('data:', data)
+      return res.json(newComment);
     })
     .catch(err => {
-      console.error(err);
+      console.error('err:', err);
       return res.status(500).json({ error: "Something wrong" });
     });
 };
@@ -141,7 +148,7 @@ exports.likeScream = (req, res) => {
       }
     })
     .then(data => {
-      if (data.empty) {
+      if (!data.empty) {
         return db
           .collection("likes")
           .add({
@@ -187,7 +194,7 @@ exports.unlikeScream = (req, res) => {
       }
     })
     .then(data => {
-      if (data.empty) {
+      if (!data.empty) {
         return res.status(400).json({ error: "Scream not liked" });
       } else {
         return db

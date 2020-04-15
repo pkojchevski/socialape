@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^4.9.9",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/styles": "^4.9.10",
     "axios": "^0.19.2",
     "cra-template": "1.0.3",
     "dayjs": "^1.8.23",

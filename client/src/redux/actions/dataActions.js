@@ -27,7 +27,7 @@ export const getScreams = () => dispatch => {
     .catch(err => {
       dispatch({
         type: SET_ERRORS,
-        payload: err.response.data
+        payload: err
       });
     });
 };
@@ -112,7 +112,7 @@ export const getScream = screamId => dispatch => {
     .catch(err => {
       dispatch({
         type: SET_ERRORS,
-        payload: err
+        payload: err.response
       });
     });
 };
@@ -120,7 +120,7 @@ export const getScream = screamId => dispatch => {
 export const submitComment = (screamId, commentData) => dispatch => {
   axios
     .post(`/scream/${screamId}/comment`, commentData)
-    .get(res => {
+    .then(res => {
       dispatch({
         type: SUBMIT_COMMENT,
         payload: res.data
@@ -128,9 +128,10 @@ export const submitComment = (screamId, commentData) => dispatch => {
       dispatch(clearErrors());
     })
     .catch(err => {
+      console.log('err in comments:', err)
       dispatch({
         type: SET_ERRORS,
-        payload: err.response.data
+        payload: err
       });
     });
 };

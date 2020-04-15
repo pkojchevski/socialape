@@ -9,14 +9,12 @@ import Profile from "../profile/Profile";
 function Sidebar({ openDrawer, closeDrawer }) {
   return (
     <Drawer anchor="left" open={openDrawer} onClose={closeDrawer}>
-      <div className="drawer-header"></div>
-      <MyButton
-        tip="close"
-        onClick={closeDrawer}
-      >
-        <ChevronLeftIcon />
-      </MyButton>
-      <Profile />
+      <div className="drawer-container">
+        <MyButton tip="close" onClick={closeDrawer}>
+          <ChevronLeftIcon />
+        </MyButton>
+        <Profile />
+      </div>
     </Drawer>
   );
 }

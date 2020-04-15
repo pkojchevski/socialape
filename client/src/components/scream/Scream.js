@@ -11,7 +11,7 @@ import CardMedia from "@material-ui/core/CardMedia";
 import Typography from "@material-ui/core/Typography";
 import { Link } from "react-router-dom";
 
-import LikeButton from "./LikeButton";
+import LikeButton from "../../util/LikeButton";
 
 import withStyles from "@material-ui/core/styles/withStyles";
 
@@ -34,7 +34,7 @@ const styles = {
     height: 30,
     padding: 10,
     borderRadius: "50%"
-    
+
   },
   content: {
     padding: 20,
@@ -44,15 +44,7 @@ const styles = {
 
 const Scream = ({
   classes,
-  scream: {
-    body,
-    createdAt,
-    userImage,
-    userHandle,
-    screamId,
-    likeCount,
-    commentCount
-  },
+  scream,
   onLikeScream,
   onUnlikeScream,
   user: {
@@ -61,14 +53,14 @@ const Scream = ({
   }
 }) => {
   const deleteButton =
-    authenticated && userHandle === handle ? (
-      <DeleteScream screamId={screamId} />
+    authenticated && scream.userHandle === handle ? (
+      <DeleteScream screamId={scream.screamId} />
     ) : null;
   dayjs.extend(relativeTime);
   return (
     <Card className={classes.card}>
       <CardMedia
-        image={userImage}
+        image={scream.userImage}
         title="Profile image"
         className={classes.image}
       />
@@ -76,26 +68,26 @@ const Scream = ({
         <Typography
           variant="h5"
           component={Link}
-          to={`/users/${userHandle}`}
+          to={`/users/${scream.userHandle}`}
           color="primary"
         >
-          {userHandle}
+          {scream.userHandle}
         </Typography>
         {deleteButton}
         <Typography variant="body2" color="textSecondary">
-          {dayjs(createdAt).fromNow()}
+          {dayjs(scream.createdAt).fromNow()}
         </Typography>
-        <Typography variant="body1">{body}</Typography>
-        <LikeButton screamId={screamId} />
-        <span>{likeCount ? likeCount : 0}</span>
+        <Typography variant="body1">{scream.body}</Typography>
+        <LikeButton screamId={scream.screamId} />
+        <span>{scream.likeCount ? scream.likeCount : 0}</span>
         <MyButton tip="comments">
           <ChatIcon color="primary" />
         </MyButton>
-        <span>{commentCount ? commentCount : 0}</span>
+        <span>{scream.commentCount ? scream.commentCount : 0}</span>
         <span>
           <ScreamDialog
-            screamIdFromParrent={screamId}
-            userHandle={userHandle}
+            screamId={scream.screamId}
+            userHandle={scream.userHandle}
             openDialog={false}
           />
         </span>
@@ -106,7 +98,7 @@ const Scream = ({
 
 Scream.propTypes = {
   user: PropTypes.object.isRequired,
-  scream: PropTypes.object.isRequired,
+  scream: PropTypes.object,
   classes: PropTypes.object.isRequired,
   openDialog: PropTypes.bool
 };

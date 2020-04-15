@@ -24,55 +24,71 @@ import ProfileSkeleton from "../../util/ProfileSkeleton";
 import EditDetails from "./EditDetails";
 import theme from "../../util/theme";
 const styles = {
-
   elevation0: {
-    background: 'transparent'
-
+    background: "transparent",
   },
   profile: {
     "& .image-wrapper": {
       textAlign: "center",
       position: "relative",
-      borderRadius: '50%',
+      borderRadius: "50%",
 
       "& button": {
         position: "absolute",
         top: "80%",
-        left: "70%"
-      }
+        left: "70%",
+        boxShadow: "2px 2px 5px 0px rgba(50, 50, 50, 0.75)",
+        backgroundColor: "#fff",
+      },
     },
     "& .profile-image": {
       width: 200,
       height: 200,
       objectFit: "cover",
       maxWidth: "100%",
-      borderRadius: "50%"
+      borderRadius: "50%",
+      border: "3px solid #fff",
+      boxShadow: "0px 0px 11px 0px rgba(50, 50, 50, 0.75)",
     },
     "& .profile-details": {
       textAlign: "center",
+      display: "flex",
+      flexFlow: "column",
+      alignItems: "center",
       "& span, svg": {
-        verticalAlign: "middle"
+        verticalAlign: "middle",
       },
       "& a": {
-        color: "#00bcd4"
-      }
+        color: "#00bcd4",
+      },
     },
     "& hr": {
       border: "none",
-      margin: "0 0 10px 0"
+      margin: "0 0 10px 0",
     },
     "& svg.button": {
       "&:hover": {
-        cursor: "pointer"
-      }
-    }
+        cursor: "pointer",
+      },
+    },
   },
   buttons: {
     textAlign: "center",
     "& a": {
-      margin: "20px 10px"
-    }
-  }
+      margin: "20px 10px",
+    },
+  },
+  logout_wrapper: {
+    position: "absolute",
+    bottom: "0",
+    margin: "auto",
+    left: "50%",
+    transform: "translateX(-50%)",
+    "& .logout_text": {
+      color: " #fff",
+      fontWeight: "bolder",
+    },
+  },
 };
 
 const Profile = ({
@@ -80,21 +96,19 @@ const Profile = ({
   user: {
     credentials: { handle, createdAt, imageUrl, bio, website, location },
     loading,
-    authenticated
+    authenticated,
   },
   uploadImage,
-  logoutUser
+  logoutUser,
 }) => {
-
-  const handleImageChange = event => {
+  const handleImageChange = (event) => {
     const image = event.target.files[0];
     const formData = new FormData();
     formData.append("image", image, image.name);
     uploadImage(formData);
   };
 
-
-  const handleEditPicture = event => {
+  const handleEditPicture = (event) => {
     event.preventDefault();
     const fileInput = document.getElementById("imageInput");
     fileInput.click();
@@ -107,10 +121,15 @@ const Profile = ({
     authenticated ? (
       <Paper classes={{ elevation0: classes.elevation0 }} elevation={0}>
         <div className={classes.profile}>
-          <div></div>
           <div className="image-wrapper">
             <form>
-              <img src={'https://kprofiles.com/wp-content/uploads/2019/11/D6aGkQlUcAAgf_n-533x800.jpg'} alt="profile" className="profile-image" />
+              <img
+                src={
+                  "https://kprofiles.com/wp-content/uploads/2019/11/D6aGkQlUcAAgf_n-533x800.jpg"
+                }
+                alt="profile"
+                className="profile-image"
+              />
               <input
                 type="file"
                 id="imageInput"
@@ -129,84 +148,68 @@ const Profile = ({
           </div>
           <hr />
           <div className="profile-details">
-            <MuiLink
-              // component={Link}
-              // to={`/users/${handle}`}
-              color="primary"
-              variant="h5"
-            >
+            <MuiLink color="primary" variant="h5">
               @{handle}
             </MuiLink>
-            <hr />
-            {bio && <Typography variant="body2">{bio}</Typography>}
+            <span>Joined {dayjs(createdAt).format("MMM YYYY")}</span>
             <hr />
             {location && (
-              <Fragment>
+              <div>
                 <LocationOn color="primary" />
                 <span>{location}</span>
                 <hr />
-              </Fragment>
+              </div>
             )}
-            {website && (
-              <Fragment>
-                <LinkIcon color="primary" />
-                <a href={website} target="_blank" rel="noopener noreferrer">
-                  {" "}
-                  {website}
-                </a>
-                <hr />
-              </Fragment>
-            )}
-            <CalendarToday color="primary" />
-            {"  "} <span>Joined {dayjs(createdAt).format("MMM YYYY")}</span>
+          </div>
+          <div className={classes.logout_wrapper}>
             <MyButton tip="Logout" onClick={handleLogout}>
-              <KeyboardReturn color="primary" />
+              {/* <KeyboardReturn color="primary" /> */}
+              <Typography className="logout_text">LOGOUT</Typography>
             </MyButton>
-            <EditDetails />
           </div>
         </div>
       </Paper>
     ) : (
-        <Paper className={classes.paper} elevation={0}>
-          <Typography variant="body2" align="center">
-            No profile found, please login again.
+      <Paper className={classes.paper} elevation={0}>
+        <Typography variant="body2" align="center">
+          No profile found, please login again.
         </Typography>
-          <div className={classes.buttons}>
-            <Button
-              variant="contained"
-              color="primary"
-              component={Link}
-              to="/login"
-            >
-              Login
+        <div className={classes.buttons}>
+          <Button
+            variant="contained"
+            color="primary"
+            component={Link}
+            to="/login"
+          >
+            Login
           </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              component={Link}
-              to="/signup"
-            >
-              Signup
+          <Button
+            variant="contained"
+            color="secondary"
+            component={Link}
+            to="/signup"
+          >
+            Signup
           </Button>
-          </div>
-        </Paper>
-      )
+        </div>
+      </Paper>
+    )
   ) : (
-      <ProfileSkeleton />
-    );
+    <ProfileSkeleton />
+  );
 
   return profileMarkup;
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   user: state.user,
   authenticated: state.user.authenticated,
-  loading: state.user.loading
+  loading: state.user.loading,
 });
 
-const mapActionToProps = dispatch => ({
+const mapActionToProps = (dispatch) => ({
   logoutUser: () => dispatch(actions.logoutUser()),
-  uploadImage: (imgData) => dispatch(actions.uploadImage(imgData))
+  uploadImage: (imgData) => dispatch(actions.uploadImage(imgData)),
 });
 
 export default connect(
