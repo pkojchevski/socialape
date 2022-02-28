@@ -1,2 +1,2 @@
 # socialape
-React + redux chat app
+React + redux chat app with firebase
